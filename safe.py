@@ -15,7 +15,10 @@ class Safe:
         assert (distance > Safe.SAFE_LEFT_BOUND)
         assert (direction in ["L", "R"])
 
+        startedAtZero = self.dialPosition == 0
+        clicksPastZero = 0
         if distance >= Safe.SAFE_RANGE:
+            clicksPastZero += distance // Safe.SAFE_RANGE
             distance %= Safe.SAFE_RANGE
         match direction:
             case "L":
@@ -25,11 +28,18 @@ class Safe:
 
         if self.dialPosition < Safe.SAFE_LEFT_BOUND:
             self.dialPosition = Safe.SAFE_RIGHT_BOUND + self.dialPosition + 1
+            if not startedAtZero:
+                clicksPastZero += 1
         elif self.dialPosition > Safe.SAFE_RIGHT_BOUND:
             self.dialPosition = Safe.SAFE_LEFT_BOUND + \
                 (self.dialPosition - Safe.SAFE_RIGHT_BOUND) - 1
+            if not startedAtZero:
+                clicksPastZero += 1
+        elif self.dialPosition == 0 and not startedAtZero:
+            clicksPastZero += 1
 
-        return self.dialPosition == 0
+        # we are now counting any click that causes the dial to point to 0
+        return clicksPastZero
 
 
 class TestSafe(unittest.TestCase):
@@ -38,16 +48,16 @@ class TestSafe(unittest.TestCase):
 
     def testRotateDial_1(self):
         safe = Safe(11)
-        self.assertFalse(safe.rotateDial("R", 8))
+        self.assertEqual(safe.rotateDial("R", 8), 0)
         self.assertEqual(safe.dialPosition, 19)
-        self.assertTrue(safe.rotateDial("L", 19))
+        self.assertEqual(safe.rotateDial("L", 19), 1)
         self.assertEqual(safe.dialPosition, 0)
 
     def testRotateDial_2(self):
         safe = Safe(5)
-        self.assertFalse(safe.rotateDial("L", 10))
+        self.assertEqual(safe.rotateDial("L", 10), 1)
         self.assertEqual(safe.dialPosition, 95)
-        self.assertTrue(safe.rotateDial("R", 5))
+        self.assertEqual(safe.rotateDial("R", 5), 1)
         self.assertEqual(safe.dialPosition, 0)
 
 
