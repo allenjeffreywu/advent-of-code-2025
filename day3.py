@@ -35,15 +35,14 @@ def maxJoltageOfBatteryBanksP1(bankList: list) -> int:
                 rMax = bankNum[r]
                 currentMax = int(bank[l] + bank[r])
             r += 1
-        # print(currentMax)
         joltageSum += currentMax
     return joltageSum
 
 
-def getIndexOfLargestDigit(nums: list) -> int:
+def getIndexOfLargestDigit(nums: list, start, end) -> int:
     index = -1
     maxDigitVal = -1
-    for i in range(len(nums)):
+    for i in range(start, end, 1):
         if nums[i] > maxDigitVal:
             index = i
             maxDigitVal = nums[i]
@@ -51,14 +50,25 @@ def getIndexOfLargestDigit(nums: list) -> int:
 
 
 def maxJoltageOfBatteryBanksP2(bankList: list) -> int:
-    # select 12 digits instead of the two
-    # ideally select the largest number at each step, but how can we ensure we are selecting the 12 largest numbers each time
-    # feels like a greedy problem
-    # I want to select the largest and earliest number in a portion of the array
-    # first digit comes from max(bank[:-11]). Whatever that index is, we then select on the rest of the array
-    # if the amount of digits == the size of the array, then we select the rest of the array.
+    NUM_BATTERIES = 12
+    joltageSum = 0
+    for bank in bankList:
+        bankNum = convertStringToNumberArray(bank)
+        currentJoltage = ""
+        l = 0
+        r = len(bankNum) - NUM_BATTERIES + 1
 
-    pass
+        while len(currentJoltage) < NUM_BATTERIES:
+            indexOfLargest = getIndexOfLargestDigit(bankNum, l, r)
+            currentJoltage += bank[indexOfLargest]
+            l = indexOfLargest + 1
+            r += 1
+            if len(bankNum[l:]) + len(currentJoltage) == NUM_BATTERIES:
+                currentJoltage += bank[l:]
+                break
+        joltageSum += int(currentJoltage)
+        print(currentJoltage)
+    return joltageSum
 
 
 class TestMaxJoltageOfBatteryBanks(unittest.TestCase):
@@ -66,15 +76,13 @@ class TestMaxJoltageOfBatteryBanks(unittest.TestCase):
         bankList = readBatteryBanks("input/day3test.txt")
         self.assertEqual(maxJoltageOfBatteryBanksP1(bankList), 357)
 
-    # def testMaxJoltageOfBatteryBanksP2(self):
-    #     bankList = readBatteryBanks("input/day3test.txt")
-    #     self.assertEqual(maxJoltageOfBatteryBanksP2(bankList), 3121910778619)
+    def testMaxJoltageOfBatteryBanksP2(self):
+        bankList = readBatteryBanks("input/day3test.txt")
+        self.assertEqual(maxJoltageOfBatteryBanksP2(bankList), 3121910778619)
 
 
 if __name__ == "__main__":
-    unittest.main()
-    # bankList = readBatteryBanks("input/day3test.txt")
-    # print(maxJoltageOfBatteryBanksP1(bankList))
-    # nums = convertStringToNumberArray(bankList[1])
-    # print(nums, getIndexOfLargestDigit(nums))
-    # print(convertStringToNumberArray("1000"))
+    # unittest.main()
+
+    bankList = readBatteryBanks("input/day3.txt")
+    print("Answer: ", maxJoltageOfBatteryBanksP2(bankList))
