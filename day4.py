@@ -58,14 +58,48 @@ def rollsAccessibleByForkliftP1(floor: list[list[str]]) -> int:
     return totalRollsAccessibleByForklift
 
 
+def getRemovableRollLocations(floor: list[list[str]]) -> list[list[int]]:
+    ROWS = len(floor)
+    COLS = len(floor[0])
+    rollLocations = []
+    for r in range(ROWS):
+        for c in range(COLS):
+            if floor[r][c] == "@" and checkBoundary(r, c, floor):
+                rollLocations.append([r, c])
+    return rollLocations
+
+
+def removeRolls(floor: list[list[str]], rollLocations=list[list[int]]) -> None:
+    for r, c in rollLocations:
+        floor[r][c] = "."
+
+
+def getMaxNumberOfRollsThatCanBeRemoved(floor: list[list[str]]) -> int:
+    ROWS = len(floor)
+    COLS = len(floor[0])
+    totalRollsRemoved = 0
+    # must calculate first pass, then we can while loop for subsequent steps
+
+    rollLocations = getRemovableRollLocations(floor)
+    while len(rollLocations) > 0:
+        totalRollsRemoved += len(rollLocations)
+        removeRolls(floor, rollLocations)
+        rollLocations = getRemovableRollLocations(floor)
+    return totalRollsRemoved
+
+
 class TestRollsAccessibleByForklift(unittest.TestCase):
     def testRollsAccessibleByForkliftP1(self):
         floor = readFloor("input/day4test.txt")
         self.assertEqual(rollsAccessibleByForkliftP1(floor), 13)
+
+    def testGetMaxNumberOfRollsThatCanBeRemoved(self):
+        floor = readFloor("input/day4test.txt")
+        self.assertEqual(getMaxNumberOfRollsThatCanBeRemoved(floor), 43)
 
 
 if __name__ == "__main__":
     # unittest.main()
 
     floor = readFloor("input/day4.txt")
-    print("Answer: ", rollsAccessibleByForkliftP1(floor))
+    print("Answer: ", getMaxNumberOfRollsThatCanBeRemoved(floor))
