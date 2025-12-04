@@ -67,7 +67,6 @@ def maxJoltageOfBatteryBanksP2(bankList: list) -> int:
                 currentJoltage += bank[l:]
                 break
         joltageSum += int(currentJoltage)
-        print(currentJoltage)
     return joltageSum
 
 
